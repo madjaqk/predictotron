@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{ pred.name }}'s Mystery Hunt Predictions</title>
+		<style type="text/css">
+			table {
+				border-collapse: collapse;
+			}
+
+			th {
+				width: 75%;
+			}
+
+			th, td {
+				border: 1px solid black;
+				padding: 5px;
+			}
+
+			.right {
+				background-color: lime;
+			}
+
+			.wrong {
+				background-color: red;
+			}
+		</style>
+	</head>
+	<body>
+		{% load get %}
+		
+		<h1>{{ pred.name }}'s Predictions</h1>
+		<table>
+			{% for field in fields %}
+				<tr {% if correct %}class="{% if correct|get:field == pred|get:field %}right{% else %}wrong{% endif %}" {% endif %} >
+					<th>{{ labels|get:field }}</th>
+					<td>{% if pred|get:field %} Yes {% else %} No {% endif %}</td>
+					{% if correct %}<td>{{points|get:field}} points</td>{% endif %}
+				</tr>
+			{% endfor %}
+			{% if correct %}
+				<tr>
+					<th colspan="2">TOTAL SCORE</th>
+					<td>{{ pred.score.0 }}</td>
+				</tr>
+			{% endif %}
+			<tr>
+				<th>TIEBREAKER: How many puzzles will Duck Soup solve?</th>
+				<td>{{ pred.duck_soup_solves }}</td>
+				{% if correct %}<td>Off by {{ points.duck_soup_solves }} (Correct answer: {{ correct.duck_soup_solves }} </td>{% endif %}
+			</tr>
+		</table>
+		<a href="{% url 'mystery_hunt:all' %}">Back</a>
+	</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<style type="text/css">
+			.chart {
+				display: inline-block;
+				border: 1px solid black;
+				width: 550px;
+				height: 250px;
+				margin: 10px;
+			}
+		</style>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="crossorigin="anonymous"></script>
+		<script type="text/javascript">
+			google.charts.load("current", {packages: ["corechart"]})
+			google.charts.setOnLoadCallback(draw_chart)
+
+			function draw_chart(){
+				$.getJSON("{% url 'mystery_hunt:get_stats' %}")
+					.then(ajax_data => {
+						console.log(ajax_data)
+
+						let fields = {
+							"duck_konundrum": '"Duck Konundrum" puzzle',
+				            "puzzle_in_two_metas": "A puzzle is part of at least two metapuzzles",
+				            "two_person_runaround": "A runaround puzzle that requires more than one person to complete",
+				            "duck_soup_scavenger_hunt": "Duck Soup completes a scavenger hunt",
+				            "duck_soup_end_game": "Duck Soup unlocks the end game",
+				            "won_before_sunday": "The Hunt is won before Sunday (MIT time)",
+				            "theme_from_brainstorming": "Hunt theme matches one of the ideas from our brainstorming",
+				            "isithuntyet_info": "isithuntyet.info is part of the puzzle",
+				            "recent_tv_show": "Puzzle about a TV show that started airing in 2016 or later",
+				            "old_tv_show": "Puzzle about a TV show that stopped airing before 1980",
+				            "recent_video_game": "Puzzle about a video game that came out in 2016 or later",
+				            "trump_twitter": "Puzzle about Donald Trump's Twitter",
+				            "mtg_puzzle": "Puzzle about Magic: the Gathering",
+				            "pokemon_puzzle": "Puzzle about Pokémon",
+				            "supervocalic_puzzle": "Puzzle about supervocalics",
+				            "taylor_swift_puzzle": "Puzzle about Taylor Swift",
+				            "simpsons_puzzle": "Puzzle about The Simpsons",
+				            "vocaloids_puzzle": "Puzzle about Vocaloids",
+				            "data_from_old_source": "Puzzle data is embedded in something produced before November 1, 2017",
+				            "team_name_puzzle": "Puzzle relying on team names",
+				            "national_crossword_puzzle": "Puzzle requires solving a nationally-published crossword",
+				            "ternary_puzzle": "Puzzle users ternary in extraction",
+				            "old_hunts_puzzle": "Puzzle that references past Mystery Hunts",
+				            "start_of_hunt_item_puzzle": "Something given at the start of the Hunt is a puzzle",
+				            "three_plus_cryptics": "At least three puzzles involve solving cryptic crossword clues",
+				            "dan_katz_wins": "Dan Katz is on the winning team",
+				            "play_video_game": "A puzzle requires playing a video game written for the Hunt",
+						}
+
+						for(let field in fields){
+							let data = new google.visualization.DataTable()
+							data.addColumn("string", "Yes-No")
+							data.addColumn("number", "Number")
+							data.addRows([
+								["yes", ajax_data[field].yes],
+								["no", ajax_data[field].no],
+							])
+
+							let options = {
+								title: fields[field],
+								pieSliceText: "label"
+							}
+
+							let chart = new google.visualization.PieChart(document.getElementById(field))
+							chart.draw(data, options)
+						}
+
+						console.log(ajax_data.duck_soup_solves)
+						let data = new google.visualization.DataTable()
+						data.addColumn("number", "Prediction")
+						data.addColumn("number", "Y-Axis")
+						data.addColumn({type: "string", role: "tooltip"})
+						data.addRows(ajax_data.duck_soup_solves)
+
+						let options = {
+							title: "TIEBREAKER: How many puzzles will Duck Soup solve?",
+							legend: { position: "none" },
+							hAxis: {baselineColor: "none"},
+							vAxis: {textStyle: {color: "none"}},
+							pointShape: "star",
+							pointSize: 20,
+						}
+
+						var chart = new google.visualization.ScatterChart(document.getElementById("duck_soup_solves"))
+						chart.draw(data, options)
+
+					})
+			}
+		</script>
+	</head>
+	<body>
+		{% if correct %}
+			<h1>Results</h1>
+			<table>
+				<tr>
+					<th>Name</th>
+					<th>Score</th>
+				</tr>
+				{% for prediction in predictions|dictsortreversed:"score" %}
+					<tr>
+						<td><a href="{% url 'mystery_hunt:show' prediction.id %}">{{ prediction.name }}</a></td>
+						<td>{{ prediction.score.0 }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% endif %}
+        <div class="chart" id="theme_from_brainstorming"></div>
+        <div class="chart" id="puzzle_in_two_metas"></div>
+        <div class="chart" id="won_before_sunday"></div>
+        <div class="chart" id="two_person_runaround"></div>
+        <div class="chart" id="isithuntyet_info"></div>
+        <div class="chart" id="data_from_old_source"></div>
+        <div class="chart" id="team_name_puzzle"></div>
+        <div class="chart" id="national_crossword_puzzle"></div>
+        <div class="chart" id="play_video_game"></div>
+        <div class="chart" id="ternary_puzzle"></div>
+        <div class="chart" id="old_hunts_puzzle"></div>
+        <div class="chart" id="start_of_hunt_item_puzzle"></div>
+        <div class="chart" id="three_plus_cryptics"></div>
+        <div class="chart" id="duck_soup_scavenger_hunt"></div>
+        <div class="chart" id="duck_soup_end_game"></div>
+        <div class="chart" id="dan_katz_wins"></div>
+		<div class="chart" id="duck_konundrum"></div>
+        <div class="chart" id="recent_tv_show"></div>
+        <div class="chart" id="old_tv_show"></div>
+        <div class="chart" id="recent_video_game"></div>
+        <div class="chart" id="trump_twitter"></div>
+        <div class="chart" id="mtg_puzzle"></div>
+        <div class="chart" id="pokemon_puzzle"></div>
+        <div class="chart" id="supervocalic_puzzle"></div>
+        <div class="chart" id="taylor_swift_puzzle"></div>
+        <div class="chart" id="simpsons_puzzle"></div>
+		<div class="chart" id="vocaloids_puzzle"></div>
+		<div class="chart" id="duck_soup_solves"></div>
+		{% if not correct %}
+			<h3>Individual predictions:</h3>
+			<p>
+				{% for prediction in predictions %}
+					<a href="{% url 'mystery_hunt:show' prediction.id %}">{{ prediction.name }}</a>
+				{% endfor %}
+			</p>
+		{% endif %}
+	</body>
+</html>
